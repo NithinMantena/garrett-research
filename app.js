@@ -828,7 +828,131 @@
       `OCR can misread characters: one sheet reads "TAS0" for "TA80" in the TPX44 part number.`,
     ].map((x) => `<li>${x}</li>`).join("");
     $("#tb-source").innerHTML = `Sources: air-permit filings listed in the audit table and on the State permits tab; Accelleron TPX product information (${T.tpx_sources.map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`).join("; ")}); non-Cat Garrett shares from the research note <code>garrett_dc_genset_turbo_share.md</code>. ` +
-      `Rebuild: <code>scripts/turbo_scan.py</code> → <code>scripts/turbo_share.py</code> → <code>scripts/build_turbo_tab.py</code>. Data as of ${esc(T.asOf)}.`;
+      `Rebuild: <code>scripts/turbo_scan.py</code> → <code>scripts/turbo_share.py</code> → <code>scripts/build_turbo_tab.py</code> (build timing: <code>scripts/build_timing.py</code>). Data as of ${esc(T.asOf)}.`;
+    renderTiming();
+  }
+
+  /* ---------- Build timing panel (landing tab) ---------- */
+  function renderTiming() {
+    const M = D.timing;
+    if (!M) { $("#tm-panel").hidden = true; return; }
+    const ym = (s) => { const [y, m] = s.split("-").map(Number); return y + (m - 1) / 12; };
+    const mon = (s) => s ? new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, 1).toLocaleString("en-US", { month: "short", year: "numeric" }) : "";
+    const W = M.cohort.with_swing, WO = M.cohort.without_swing, SW = M.cohort.swing;
+    const yr = Object.fromEntries(M.by_year.map((r) => [r.year, r]));
+    const y26 = yr["2026"], prior = ["2023", "2024"].map((y) => yr[y]).filter(Boolean);
+    const priorAvg = prior.reduce((a, r) => a + r.mw, 0) / (prior.length || 1);
+    const rows = M.schedules;
+    const endOf = (r) => r.tail_to || r.end || r.start;
+    const byEnd = rows.filter((r) => r.end).map((r) => r.end).sort();
+    const within29 = rows.filter((r) => r.end && r.end <= "2029-12").length;
+    const longest = rows.filter((r) => endOf(r) > "2029-12");
+
+    $("#tm-kpis").innerHTML = [
+      ["MW first permitted in 2026", `${num(y26.mw / 1000, 1)} GW`, `vs ${num(priorAvg / 1000, 1)} GW a year in 2023–24 (five states)`],
+      ["Stated schedules reach", `${byEnd[0].slice(0, 4)}–${byEnd.filter((e) => e <= "2029-12").pop().slice(0, 4)}`, `${within29} of ${rows.filter((r) => r.end).length} dated filings end by 2029; ${longest.map((r) => `${r.site.split(" (")[0]} runs to ${endOf(r).slice(0, 4)}`).join("; ")}`],
+      ["Garrett share of 2026-cohort Cat turbos", pct(W.garrett_of_cat_known, 0), `${pct(WO.garrett_of_cat_known, 0)} without ${SW ? esc(SW.site.split(" (")[0]) : "the largest project"}`, true],
+      ["Garrett share of 2026-cohort genset MW", `${pct(W.garrett_of_named_low, 0)}–${pct(W.garrett_of_named_mid, 0)}`, `maker-named MW, five states; ${pct(WO.garrett_of_named_low, 0)}–${pct(WO.garrett_of_named_mid, 0)} without ${SW ? esc(SW.site.split(" (")[0]) : "it"}`, true],
+    ].map(([l, v, n, a]) => `<div class="kpi"><div class="kpi-label">${l}</div><div class="kpi-value ${a ? "accent" : ""}">${v}</div><div class="kpi-note">${n}</div></div>`).join("");
+
+    /* MW by year first permitted */
+    const SEG = [
+      ["Garrett", "Cat, Garrett turbo on data sheet", MAKER_COLOR["Garrett"]],
+      ["Mixed match", "Cat, engine matches two turbo makers (split 50/50)", "var(--red-300)"],
+      ["Accelleron", "Cat, Accelleron turbo on data sheet", MAKER_COLOR["Accelleron"]],
+      ["No data sheet", "Cat, no data sheet for the rating", MAKER_COLOR["No data sheet"]],
+      ["_other", "Other engine makers (Cummins, MTU, Kohler…)", "var(--grey-300)"],
+      ["_unnamed", "Permit does not name the maker", null],
+    ];
+    const parts = (r) => {
+      const c = r.cat || {}, p = {};
+      SEG.forEach(([k]) => { p[k] = c[k] || 0; });
+      p["_other"] = Math.max(0, r.named_mw - r.cat_mw);
+      p["_unnamed"] = Math.max(0, r.mw - r.named_mw);
+      return p;
+    };
+    const maxMW = Math.max(...M.by_year.map((r) => r.mw));
+    $("#tm-years").innerHTML = "";
+    M.by_year.forEach((r) => {
+      const p = parts(r), row = document.createElement("div");
+      row.className = "yearbar";
+      row.innerHTML = `<div class="yearbar-y ${r.year === "2026" ? "now" : ""}">${esc(r.year)}</div><div class="yearbar-track"><div class="yearbar-fill" style="width:${(r.mw / maxMW) * 100}%"></div></div><div class="yearbar-v">${num(r.mw)} MW${r.garrett_of_cat_known != null ? `<br><span class="muted">Garrett ${pct(r.garrett_of_cat_known, 0)} of Cat</span>` : ""}</div>`;
+      const fill = row.querySelector(".yearbar-fill");
+      SEG.forEach(([k, lab, col]) => {
+        if (p[k] < 1) return;
+        const s = document.createElement("span");
+        s.style.flex = `${p[k]} 1 0`;
+        if (col) s.style.background = col; else s.className = "seg-unnamed";
+        bindTip(s, `<b>${esc(r.year)}: ${esc(lab)}</b><br>${num(p[k])} MW · ${pct(p[k] / r.mw)} of the year`);
+        fill.appendChild(s);
+      });
+      bindTip(row.querySelector(".yearbar-y"), `<b>First permitted ${esc(r.year)}</b><br>` + Object.entries(r.by_state).map(([s, v]) => `${s} ${num(v)} MW`).join(" · "));
+      $("#tm-years").appendChild(row);
+    });
+    $("#tm-years-legend").innerHTML = SEG.map(([k, lab, col]) => `<span><i class="swatch ${col ? "" : "seg-unnamed"}" ${col ? `style="background:${col}"` : ""}></i>${esc(lab)}</span>`).join("");
+
+    /* Gantt of stated schedules */
+    const A0 = 2024, A1 = 2031, span = A1 - A0;
+    const x = (v) => Math.max(0, Math.min(100, ((v - A0) / span) * 100));
+    const now = new Date(), nowV = now.getFullYear() + now.getMonth() / 12;
+    const colOf = (t) => t === "Garrett" ? MAKER_COLOR["Garrett"] : t === "Accelleron" ? MAKER_COLOR["Accelleron"] : /^(Unknown|None)/.test(t || "Unknown") ? "var(--lens-unknown)" : "var(--grey-300)";
+    const barBg = (r) => {
+      const tm = r.turbo_mw && Object.keys(r.turbo_mw).length ? r.turbo_mw : { [r.turbo || "Unknown"]: 1 };
+      const tot = Object.values(tm).reduce((a, v) => a + v, 0) || 1;
+      let acc = 0;
+      const stops = Object.entries(tm).map(([k, v]) => { const a = (acc / tot) * 100; acc += v; return `${colOf(k)} ${a}% ${(acc / tot) * 100}%`; });
+      const only = Object.keys(tm)[0];
+      if (stops.length === 1 && /^(Unknown|None)/.test(only)) return "repeating-linear-gradient(135deg, var(--ink-3) 0 2px, transparent 2px 6px)";
+      return stops.length === 1 ? colOf(only) : `linear-gradient(90deg, ${stops.join(", ")})`;
+    };
+    const mainTurbo = (r) => r.turbo_mw && Object.keys(r.turbo_mw).length ? Object.entries(r.turbo_mw).map(([k, v]) => `${k} ${num(v)}`).join(" · ") : (r.turbo || "–");
+    const sorted = rows.slice().sort((a, b) => (a.end || "9999").localeCompare(b.end || "9999") || a.start.localeCompare(b.start));
+    const ticks = Array.from({ length: span + 1 }, (_, i) => A0 + i);
+    let html = `<div class="g-row g-axis"><div></div><div class="g-track">${ticks.map((t) => `<span class="g-year ${t === now.getFullYear() ? "now" : ""}" style="left:${x(t)}%">${t}</span>`).join("")}</div><div class="g-end muted">Ends</div></div>`;
+    sorted.forEach((r, i) => {
+      const s = ym(r.start), e = r.end ? ym(r.end) + 1 / 12 : s + 1, beyond = endOf(r) > `${A1 - 1}-12`;
+      html += `<div class="g-row"><div class="g-label"><strong>${esc(r.site)}</strong><span class="small muted">${esc(r.state)} · ${r.kind === "prime" ? "on-site power" : "backup gensets"}${r.mw ? ` · ${num(r.mw)} MW` : ""}</span></div>` +
+        `<div class="g-track">${ticks.map((t) => `<span class="g-tick" style="left:${x(t)}%"></span>`).join("")}<span class="g-now" style="left:${x(nowV)}%"></span>` +
+        `<span class="g-bar ${r.end ? "" : "open"}" data-i="${i}" style="left:${x(s)}%;width:${Math.max(1, x(Math.min(e, A1)) - x(s))}%;background:${barBg(r)}"></span>` +
+        (beyond ? `<span class="g-more">→ ${esc(endOf(r).slice(0, 4))}</span>` : "") + `</div>` +
+        `<div class="g-end">${esc(r.end ? mon(r.end) : "not stated")}</div></div>`;
+    });
+    $("#tm-gantt-legend").innerHTML = `${[["Garrett turbo", MAKER_COLOR["Garrett"]], ["Accelleron turbo", MAKER_COLOR["Accelleron"]], ["Other engine makers (own or other turbos)", "var(--grey-300)"], ["Turbo unknown, or turbines (no turbo)", null]].map(([l, c]) => `<span><i class="swatch" style="background:${c || "repeating-linear-gradient(135deg, var(--ink-3) 0 2px, transparent 2px 5px)"}"></i>${l}</span>`).join("")}<span><i class="swatch" style="background:var(--accent);width:2px"></i>Today</span><span>Faded end = end date not stated</span>`;
+    $("#tm-gantt").innerHTML = html;
+    $("#tm-gantt").querySelectorAll(".g-bar").forEach((b) => {
+      const r = sorted[+b.dataset.i];
+      bindTip(b, `<b>${esc(r.site)}</b><br>${esc(r.end_label)}<br><i>“${esc(r.quote)}”</i><br>${esc(r.engines || "")}<br>Turbo: ${esc(mainTurbo(r))}${r.turbo_mw ? " MW" : ""}`);
+    });
+
+    /* cohort table */
+    const cb = (c, k) => num((c.cat_buckets || {})[k] || 0);
+    const swName = SW ? SW.site.split(" (")[0] : "largest project";
+    const crow = (lab, f, cls = "") => `<tr><td>${lab}</td><td class="num ${cls}">${f(W)}</td><td class="num ${cls}">${f(WO)}</td></tr>`;
+    $("#tm-cohort").innerHTML = `<thead><tr><th scope="col">Units first permitted in 2026</th><th scope="col" class="num">All</th><th scope="col" class="num">Excl. ${esc(swName.replace(/^Project /, ""))}</th></tr></thead><tbody>` +
+      crow("Generator MW where the permit names the engine maker", (c) => num(c.named_mw)) +
+      crow("Cat MW (incl. \"Cat or alternate\")", (c) => `${num(c.cat_mw)} <span class="muted">(${pct(c.cat_share_of_named, 0)})</span>`) +
+      crow("· Garrett turbo on the rating's data sheet", (c) => cb(c, "Garrett")) +
+      crow("· Accelleron turbo on the rating's data sheet", (c) => cb(c, "Accelleron")) +
+      crow("· engine matches two turbo makers (split 50/50)", (c) => cb(c, "Mixed match")) +
+      crow("· no data sheet for the rating (left out)", (c) => cb(c, "No data sheet")) +
+      crow("<b>Garrett share of Cat genset turbos</b>", (c) => `<b>${pct(c.garrett_of_cat_known, 0)}</b>`, "mono") +
+      crow("<b>Garrett share of all maker-named genset MW</b>", (c) => `<b>${pct(c.garrett_of_named_low, 0)}–${pct(c.garrett_of_named_mid, 0)}</b>`, "mono") +
+      `</tbody>`;
+    $("#tm-note").innerHTML =
+      `<b>Reading this:</b> the 2026 cohort covers most generators installed in 2027 and part of 2028; capacity for late 2028 and beyond is still being permitted. ` +
+      (SW ? `${esc(SW.site)} alone is ${num(SW.mw)} MW of Cat 3516E at ${num(SW.kw)} ekW (${esc(SW.turbo)} turbos), ${pct(SW.mw / (W.cat_mw || 1), 0)} of 2026 Cat MW, and its application is still pending. Built as filed, Garrett's share of Cat turbos is ${pct(W.garrett_of_cat_known, 0)}; if it slips or changes engines, ${pct(WO.garrett_of_cat_known, 0)}. ` : "") +
+      `The lower all-maker figure counts only Cat MW with a Garrett data sheet; the upper one assumes Cat MW without a sheet splits like the rest. Garrett ships its turbo when Cat builds the engine, a few months before the generator reaches site, so revenue on these units runs slightly ahead of the install dates. The five states lean to Cat; on the research note's global maker mix the share stays near ${pct((D.shareModel.headline || {}).point || 0, 0)}.`;
+
+    /* sources */
+    sortableTable($("#tm-sources"), [
+      { key: "site", label: "Site", html: (r) => `<strong>${esc(r.site)}</strong>${r.operator ? `<div class="small muted">${esc(r.operator)}</div>` : ""}` },
+      { key: "state", label: "State" },
+      { key: "end", label: "Schedule", sort: (r) => r.end || "9999", html: (r) => `<span class="small">${esc(r.end_label)}</span>` },
+      { key: "mw", label: "MW", num: true, html: (r) => r.mw ? num(r.mw) : `<span class="muted">–</span>` },
+      { key: "engines", label: "Engines / turbo", html: (r) => `<span class="small">${esc(r.engines || "–")}</span><div>${makerPill(Object.keys(r.turbo_mw || { [r.turbo || "Unknown"]: 1 }).join(" + "))}</div>` },
+      { key: "quote", label: "What the filing says", html: (r) => `<span class="small"><i>“${esc(r.quote)}”</i></span>` },
+      { key: "doc", label: "Source", html: (r) => `<a href="${esc(r.url)}${r.page ? "#page=" + r.page : ""}" target="_blank" rel="noopener" class="mono">${esc(r.doc)}${r.page ? " p." + r.page : ""}</a>` },
+    ], () => rows, { sortKey: "end", dir: 1 });
   }
 
   function sheetCols() {

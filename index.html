@@ -102,6 +102,32 @@
       <p class="callout" id="tb-build-note"></p>
     </article>
 
+    <article class="panel" id="tm-panel">
+      <header class="panel-head"><div>
+        <h2>How far ahead the permits reach</h2>
+        <p class="panel-sub">A data centre gets its air permit before it builds, so the newest permits describe generators installed over the next one to three years. No permit is dated 2027 yet; units first permitted in 2026 are the forward view, mostly installed in 2027–28.</p>
+      </div></header>
+      <div class="kpis" id="tm-kpis"></div>
+      <h3 class="insight-h">Generator MW by year first permitted</h3>
+      <p class="panel-sub" style="margin:-4px 0 12px">Five complete state permit sets. Bar length = MW. Cat MW is split by the turbo maker on its rating's data sheet.</p>
+      <div id="tm-years" class="yearbars"></div>
+      <div id="tm-years-legend" class="hbar-key" style="margin-top:12px"></div>
+
+      <h3 class="insight-h" style="margin-top:26px">Construction and operation dates stated in filings</h3>
+      <p class="panel-sub" style="margin:-4px 0 12px">Every filing in the collection that states a schedule. Bar colour = turbo maker on the site's generators. Hover a bar for the filing's words; the table below links each source.</p>
+      <div class="table-scroll"><div id="tm-gantt" class="gantt"></div></div>
+      <div id="tm-gantt-legend" class="hbar-key" style="margin-top:10px"></div>
+
+      <h3 class="insight-h" style="margin-top:26px">Garrett share of the 2026 cohort (installed mostly 2027–28)</h3>
+      <div class="table-scroll"><table class="data" id="tm-cohort"></table></div>
+      <p class="callout" id="tm-note"></p>
+
+      <details class="tm-details">
+        <summary>Sources for each stated date</summary>
+        <div class="table-scroll"><table class="data sortable" id="tm-sources"></table></div>
+      </details>
+    </article>
+
     <article class="panel" id="tb-calc-panel">
       <header class="panel-head">
         <div>
@@ -366,6 +392,7 @@
 <script src="data/consolidated.js"></script>
 <script src="data/turbo.js"></script>
 <script src="data/share_model.js"></script>
+<script src="data/timing.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
