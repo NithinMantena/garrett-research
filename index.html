@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  /* Same reset the Artifact skeleton provides */
+  :root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<title>Garrett Motion Research</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <div class="brand-name">Garrett Motion</div>
+        <div class="brand-sub">NASDAQ: GTX · research workbook</div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Research sections"></nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <section id="tab-turbo" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-turbo" hidden>
+    <div class="intro">
+      <p class="eyebrow">Garrett Motion · data-centre backup generators</p>
+      <h1>How much of the data-centre generator turbo market does Garrett supply?</h1>
+      <p class="lede">Data centres need an air permit for their backup generators. Permits say which engines are installed; the engine data sheets attached to many applications name the turbocharger part. Putting the two together estimates Garrett's share from public documents, and every number on this page links back to a source.</p>
+    </div>
+
+    <div class="kpis" id="tb-kpis"></div>
+
+    <article class="panel">
+      <header class="panel-head"><div>
+        <h2>Summary of findings</h2>
+        <p class="panel-sub">What the documents show. "2025–26" means generators first permitted in 2025 or 2026 (Virginia: new units in 2026 permits).</p>
+      </div></header>
+      <ol class="insights" id="tb-findings"></ol>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head"><div>
+        <h2>Method: from engine maker share to Garrett share</h2>
+        <p class="panel-sub">Six steps. Each step names the documents it uses and the table further down this page that shows the data.</p>
+      </div></header>
+      <ol class="method" id="tb-method"></ol>
+      <div class="formula" id="tb-formula"></div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head"><div>
+        <h2>Step 4 evidence: turbocharger by Cat engine rating</h2>
+        <p class="panel-sub">Each row is one Cat performance number (an exact engine rating). "Sheets" counts data sheets naming a turbo for that rating; "sites" are the data centres whose filings contain them. The full list of sheets is in the audit table below.</p>
+      </div></header>
+      <div class="table-scroll"><table class="data sortable" id="tb-ratings"></table></div>
+      <p class="callout" id="tb-ratings-note"></p>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>Step 5: Cat generator MW by turbo maker</h2>
+          <p class="panel-sub">Cat capacity in the five complete state permit sets (Virginia, Georgia, Ohio, Texas, Arizona), matched to the turbo evidence by engine model and rated kW.</p>
+        </div>
+        <div class="controls">
+          <label class="field" for="tb-groups-toggle"><span>Detail</span>
+            <select id="tb-groups-toggle"><option value="buckets">By engine group</option><option value="groups">By engine and rating</option></select>
+          </label>
+        </div>
+      </header>
+      <div id="tb-mw-bars" class="stackchart"></div>
+      <div id="tb-mw-legend" class="legend-list"></div>
+      <div class="table-scroll" style="margin-top:16px"><table class="data sortable" id="tb-buckets"></table></div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>Step 6: from Cat to the whole data-centre genset market</h2>
+          <p class="panel-sub">Garrett share of all data-centre genset turbos = Σ (engine maker's share of generator MW × Garrett's share of that maker's turbos).</p>
+        </div>
+        <div class="controls">
+          <label class="field" for="tb-mix"><span>Engine maker mix</span>
+            <select id="tb-mix"><option value="us_recent">US permits, 2025–26</option><option value="us_all">US permits, all units</option><option value="global">Global estimate (research note)</option></select>
+          </label>
+        </div>
+      </header>
+      <div class="table-scroll"><table class="data" id="tb-build"></table></div>
+      <p class="callout" id="tb-build-note"></p>
+    </article>
+
+    <article class="panel" id="tb-calc-panel">
+      <header class="panel-head">
+        <div>
+          <h2>Try your own assumptions</h2>
+          <p class="panel-sub">Starts from the evidence above. Switch to Custom to change any input; Evidence puts every input back.</p>
+        </div>
+        <div class="controls">
+          <div class="seg-toggle" role="group" aria-label="Calculator mode">
+            <button type="button" class="btn" id="tb-mode-evidence" aria-pressed="true">Evidence</button>
+            <button type="button" class="btn ghost" id="tb-mode-custom" aria-pressed="false">Custom</button>
+          </div>
+          <label class="field" for="tb-calc-mix"><span>Engine maker mix</span>
+            <select id="tb-calc-mix"><option value="us_recent">US permits, 2025–26</option><option value="us_all">US permits, all units</option><option value="global">Global estimate (research note)</option></select>
+          </label>
+        </div>
+      </header>
+      <div class="grid-2 calc-grid">
+        <div>
+          <h3 class="insight-h">Garrett share of each Cat engine group's turbos</h3>
+          <div class="table-scroll"><table class="data" id="tb-calc-cat"></table></div>
+        </div>
+        <div>
+          <h3 class="insight-h">Engine maker mix and Garrett share of their turbos</h3>
+          <div class="table-scroll"><table class="data" id="tb-calc-makers"></table></div>
+        </div>
+      </div>
+      <div class="kpis" id="tb-calc-out" style="margin-top:18px"></div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>Audit trail: every data sheet that names a turbocharger</h2>
+          <p class="panel-sub">One row per sheet. "Source" opens the public document; go to the page shown. Pages marked OCR were scanned images or garbled text, read with text recognition.</p>
+        </div>
+        <div class="controls">
+          <label class="field" for="tb-f-state"><span>State</span><select id="tb-f-state"><option value="all">All</option></select></label>
+          <label class="field" for="tb-f-maker"><span>Turbo maker</span><select id="tb-f-maker"><option value="all">All</option></select></label>
+          <label class="field" for="tb-f-engine"><span>Engine</span><select id="tb-f-engine"><option value="all">All</option></select></label>
+          <label class="field" for="tb-f-search"><span>Search</span><input id="tb-f-search" type="search" placeholder="Amazon, EM5402…"></label>
+        </div>
+      </header>
+      <p class="small muted" id="tb-sheets-count" style="margin:0 0 8px"></p>
+      <div class="table-scroll tall"><table class="data sortable" id="tb-sheets"></table></div>
+    </article>
+
+    <div class="grid-2">
+      <article class="panel">
+        <header class="panel-head"><div>
+          <h2>Documents searched</h2>
+          <p class="panel-sub">Every page was read; scanned and garbled pages went through OCR. Sheets = data sheets found that name a turbo.</p>
+        </div></header>
+        <div class="table-scroll"><table class="data" id="tb-docs"></table></div>
+      </article>
+      <article class="panel">
+        <header class="panel-head"><div>
+          <h2>Limits of the data</h2>
+        </div></header>
+        <ul class="gaps" id="tb-caveats"></ul>
+      </article>
+    </div>
+
+    <footer class="source" id="tb-source"></footer>
+  </section>
+
+  <section id="tab-states" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-states" hidden>
+    <div class="intro">
+      <p class="eyebrow">Data-centre generator air permits · by state</p>
+      <h1>State permits</h1>
+      <p class="lede">Virginia, Georgia, Ohio, Texas and Arizona are full permit sets: every data-centre permit we could find, turned into a generator table. They supply the engine maker shares and MW weights. Maryland, Missouri, Indiana, California, North Dakota and Wisconsin cover only the individual filings collected for the turbo evidence.</p>
+    </div>
+    <nav class="subtabs" id="state-tabs" role="tablist" aria-label="States"></nav>
+    <section id="tab-virginia" class="subpanel" role="tabpanel" aria-labelledby="stbtn-virginia" hidden>
+    <div class="intro">
+      <p class="eyebrow">Data-centre gensets · Virginia DEQ air permits</p>
+      <h1>Who builds the engines behind Virginia's data centres</h1>
+      <p class="lede">Every Virginia data centre needs an air permit listing each backup generator by engine maker and model. 47 of the state's 194 permits have been turned into structured data. Each generator below is tagged by whose turbochargers it likely uses.</p>
+    </div>
+
+    <div class="kpis" id="va-kpis"></div>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>Turbo-supplier lens on permitted capacity</h2>
+          <p class="panel-sub">Share of generator MW by likely turbo source. Red = Caterpillar engines, where turbos are bought from outside suppliers (Garrett, Accelleron or BorgWarner). Grey = closed or not yet researched.</p>
+        </div>
+      </header>
+      <div id="va-lens-chart" class="stackchart"></div>
+      <div id="va-lens-legend" class="legend-list"></div>
+      <p class="callout" id="va-lens-callout"></p>
+    </article>
+
+    <div class="grid-2">
+      <article class="panel">
+        <header class="panel-head">
+          <div>
+            <h2>Engine maker share of MW</h2>
+            <p class="panel-sub">All counted units vs units in the "new" sections of permits issued in 2026.</p>
+          </div>
+        </header>
+        <div id="va-maker-chart"></div>
+      </article>
+      <article class="panel">
+        <header class="panel-head">
+          <div>
+            <h2>Engine families</h2>
+            <p class="panel-sub">Grouped from the model strings in each permit. Hover a row for its kW range.</p>
+          </div>
+        </header>
+        <div class="table-scroll"><table class="data" id="va-family-table"></table></div>
+      </article>
+    </div>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>Sites</h2>
+          <p class="panel-sub">43 sites with generators that pass every check. Click a column to sort; open the permit PDF from the site name.</p>
+        </div>
+        <div class="controls">
+          <label class="field" for="va-site-filter"><span>Show</span>
+            <select id="va-site-filter">
+              <option value="all">All sites</option>
+              <option value="2026">Permits issued 2026</option>
+              <option value="cat">Caterpillar on site</option>
+              <option value="ne">Non-emergency units allowed</option>
+            </select>
+          </label>
+          <label class="field" for="va-site-search"><span>Search</span>
+            <input id="va-site-search" type="search" placeholder="Amazon, Loudoun…">
+          </label>
+        </div>
+      </header>
+      <div class="table-scroll"><table class="data sortable" id="va-site-table"></table></div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>Generator rows</h2>
+          <p class="panel-sub">One row per equipment line in a permit, with the page it came from.</p>
+        </div>
+        <div class="controls">
+          <label class="field" for="va-unit-lens"><span>Turbo lens</span>
+            <select id="va-unit-lens"><option value="all">All</option></select>
+          </label>
+        </div>
+      </header>
+      <div class="table-scroll tall"><table class="data sortable" id="va-unit-table"></table></div>
+    </article>
+
+    <footer class="source" id="va-source"></footer>
+  </section>
+
+    <section id="tab-georgia" class="subpanel" role="tabpanel" aria-labelledby="stbtn-georgia" hidden></section>
+    <section id="tab-ohio" class="subpanel" role="tabpanel" aria-labelledby="stbtn-ohio" hidden></section>
+    <section id="tab-texas" class="subpanel" role="tabpanel" aria-labelledby="stbtn-texas" hidden></section>
+    <section id="tab-arizona" class="subpanel" role="tabpanel" aria-labelledby="stbtn-arizona" hidden></section>
+    <section id="tab-maryland" class="subpanel" role="tabpanel" aria-labelledby="stbtn-maryland" hidden></section>
+    <section id="tab-missouri" class="subpanel" role="tabpanel" aria-labelledby="stbtn-missouri" hidden></section>
+    <section id="tab-indiana" class="subpanel" role="tabpanel" aria-labelledby="stbtn-indiana" hidden></section>
+    <section id="tab-california" class="subpanel" role="tabpanel" aria-labelledby="stbtn-california" hidden></section>
+    <section id="tab-northdakota" class="subpanel" role="tabpanel" aria-labelledby="stbtn-northdakota" hidden></section>
+    <section id="tab-wisconsin" class="subpanel" role="tabpanel" aria-labelledby="stbtn-wisconsin" hidden></section>
+  </section>
+
+  <section id="tab-share" class="tab-panel" role="tabpanel" aria-labelledby="tabbtn-share" hidden>
+    <div class="intro">
+      <p class="eyebrow">Data-centre power · Garrett turbo opportunity</p>
+      <h1>Research-note share model, checked against five states of permits</h1>
+      <p class="lede">Engine maker share of data-centre genset MW × Garrett's share of that maker's turbos, now checked against air permits for 19,000 generators in Virginia, Georgia, Ohio, Texas and Arizona, plus the gas plants being built to power data centres directly.</p>
+    </div>
+
+    <div class="kpis" id="sh-pkpis"></div>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>What five states of permits say about Garrett</h2>
+          <p class="panel-sub">Consolidated from the state tabs. Shares are of MW where the permit names the engine maker; "recent" = units first permitted in 2025–26 (Virginia: new units in 2026 permits).</p>
+        </div>
+      </header>
+      <div class="grid-2 insight-grid">
+        <div><h3 class="insight-h">Backup gensets</h3><ol class="insights" id="sh-ins-genset"></ol></div>
+        <div><h3 class="insight-h">Prime power</h3><ol class="insights" id="sh-ins-prime"></ol></div>
+      </div>
+      <div class="table-scroll" style="margin-top:18px"><table class="data" id="sh-state-table"></table></div>
+    </article>
+
+    <div class="kpis" id="sh-kpis"></div>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>Share build-up</h2>
+          <p class="panel-sub">Inputs are editable. Captive makers build their own turbos and stay at 0%. Switch the market mix to the US permit evidence to see the US picture.</p>
+        </div>
+        <div class="controls">
+          <label class="field" for="sh-mix"><span>Market mix</span>
+            <select id="sh-mix"><option value="global">Global estimate (note)</option><option value="us_all">US permits, all units</option><option value="us_recent">US permits, 2025–26</option></select>
+          </label>
+          <button type="button" class="btn" id="sh-reset">Reset to note</button>
+          <button type="button" class="btn ghost" id="sh-low">Low case</button>
+          <button type="button" class="btn ghost" id="sh-high">High case</button>
+        </div>
+      </header>
+      <div class="table-scroll"><table class="data" id="sh-table"></table></div>
+      <div id="sh-bar" class="stackchart" style="margin-top:20px"></div>
+      <p class="callout" id="sh-check"></p>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head">
+        <div>
+          <h2>Prime power: the second market</h2>
+          <p class="panel-sub">On-site plants permitted to power data centres around the clock (Georgia, Ohio, Texas). Only reciprocating engines carry turbochargers; turbines, fuel cells and linear generators do not.</p>
+        </div>
+      </header>
+      <div id="sh-prime-bars" class="stackchart"></div>
+      <div class="table-scroll" style="margin-top:16px"><table class="data" id="sh-prime-table"></table></div>
+      <p class="callout" id="sh-prime-callout"></p>
+    </article>
+
+    <div class="grid-2">
+      <article class="panel">
+        <header class="panel-head"><div><h2>Which power sources use turbos</h2></div></header>
+        <div class="table-scroll"><table class="data" id="sh-turbo-table"></table></div>
+      </article>
+      <article class="panel">
+        <header class="panel-head"><div><h2>Implied turbo content per MW</h2>
+          <p class="panel-sub">Garrett DC revenue ÷ (global DC engine-genset GW × Garrett share).</p></div></header>
+        <div id="sh-content"></div>
+      </article>
+    </div>
+
+    <article class="panel">
+      <header class="panel-head"><div><h2>Turbo source by engine maker: evidence</h2></div></header>
+      <div class="table-scroll"><table class="data" id="sh-evidence"></table></div>
+    </article>
+
+    <article class="panel">
+      <header class="panel-head"><div><h2>Where to dig next</h2></div></header>
+      <ol class="steps" id="sh-next"></ol>
+    </article>
+
+    <footer class="source" id="sh-source">Source: research note <code>garrett_dc_genset_turbo_share.md</code> (Nov 2026) and the five state permit tabs, consolidated by <code>scripts/build_consolidated.py</code>.</footer>
+  </section>
+</main>
+
+<footer class="site-disclaimer">
+  <div class="wrap">Independent research for discussion only. Not investment advice and not a recommendation to buy or sell any security. Figures are built from public air-permit filings and may contain errors; each tab links to its sources.</div>
+</footer>
+
+<div id="tooltip" class="tooltip" role="status" hidden></div>
+
+<script src="data/virginia.js"></script>
+<script src="data/georgia.js"></script>
+<script src="data/ohio.js"></script>
+<script src="data/texas.js"></script>
+<script src="data/arizona.js"></script>
+<script src="data/consolidated.js"></script>
+<script src="data/turbo.js"></script>
+<script src="data/share_model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
